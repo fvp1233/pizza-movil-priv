@@ -9,6 +9,9 @@ import SplashScreen from "../screens/SplashScreen";
 import LoginScreen from "../screens/LoginScreen";
 import RegisterCustomer from "../screens/RegisterCustomer";
 import VerifyCustomerScreen from "../screens/VerifyCustomerScreen";
+import RecoveryRequestScreen from "../screens/RecoveryRequestScreen";
+import RecoveryVerifyScreen from "../screens/RecoveryVerifyScreen";
+import RecoveryNewPasswordScreen from "../screens/RecoveryNewPasswordScreen";
 import TabMenu from "./TabMenu";
 
 export default function AppContent() {
@@ -16,6 +19,7 @@ export default function AppContent() {
   const showSplash = useSplashTimer(isBooting);
   const [authView, setAuthView] = useState("login");
   const [pendingRegistration, setPendingRegistration] = useState(null);
+  const [pendingRecoveryEmail, setPendingRecoveryEmail] = useState(null);
 
   if (showSplash) {
     return <SplashScreen />;
@@ -44,7 +48,47 @@ export default function AppContent() {
       );
     }
 
-    return <LoginScreen onOpenRegister={() => setAuthView("register")} />;
+    if (authView === "recovery-request") {
+      return (
+        <RecoveryRequestScreen
+          onBack={() => setAuthView("login")}
+          onCodeSent={(email) => {
+            setPendingRecoveryEmail(email);
+            setAuthView("recovery-verify");
+          }}
+        />
+      );
+    }
+
+    if (authView === "recovery-verify") {
+      return (
+        <RecoveryVerifyScreen
+          email={pendingRecoveryEmail}
+          onBack={() => setAuthView("recovery-request")}
+          onVerified={() => setAuthView("recovery-newpassword")}
+        />
+      );
+    }
+
+    if (authView === "recovery-newpassword") {
+      return (
+        <RecoveryNewPasswordScreen
+          email={pendingRecoveryEmail}
+          onBack={() => setAuthView("recovery-verify")}
+          onFinish={() => {
+            setPendingRecoveryEmail(null);
+            setAuthView("login");
+          }}
+        />
+      );
+    }
+
+    return (
+      <LoginScreen
+        onOpenRegister={() => setAuthView("register")}
+        onOpenRecovery={() => setAuthView("recovery-request")}
+      />
+    );
   }
 
   return (

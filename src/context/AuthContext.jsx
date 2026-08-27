@@ -142,6 +142,73 @@ export function AuthProvider({ children }) {
     [],
   );
 
+  const requestPasswordRecovery = useCallback(async ({ email }) => {
+    const response = await fetch(
+      `${getApiBaseUrl()}/recoveryPassword/requestCode`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
+      },
+    );
+
+    const payload = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(
+        payload?.message ?? "No se pudo enviar el código de recuperación",
+      );
+    }
+
+    return payload;
+  }, []);
+
+  const verifyRecoveryCode = useCallback(async ({ code }) => {
+    const response = await fetch(
+      `${getApiBaseUrl()}/recoveryPassword/verifyCode`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ code }),
+      },
+    );
+
+    const payload = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(payload?.message ?? "No se pudo verificar el código");
+    }
+
+    return payload;
+  }, []);
+
+  const resetPassword = useCallback(
+    async ({ newPassword, confirmNewPassword }) => {
+      const response = await fetch(
+        `${getApiBaseUrl()}/recoveryPassword/newPassword`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ newPassword, confirmNewPassword }),
+        },
+      );
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          payload?.message ?? "No se pudo actualizar la contraseña",
+        );
+      }
+
+      return payload;
+    },
+    [],
+  );
+
   // Cierra sesion en backend y limpia el estado/localStorage en la app.
   const logout = useCallback(async () => {
     try {
@@ -163,10 +230,23 @@ export function AuthProvider({ children }) {
       login,
       register,
       verifyRegistrationCode,
+      requestPasswordRecovery,
+      verifyRecoveryCode,
+      resetPassword,
       logout,
       apiBaseUrl: getApiBaseUrl(),
     }),
-    [isBooting, login, logout, register, user, verifyRegistrationCode],
+    [
+      isBooting,
+      login,
+      logout,
+      register,
+      requestPasswordRecovery,
+      resetPassword,
+      user,
+      verifyRecoveryCode,
+      verifyRegistrationCode,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

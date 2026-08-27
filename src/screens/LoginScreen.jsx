@@ -12,7 +12,7 @@ import InputPassword from "../components/Inputs/InputPassword";
 import CustomButton from "../components/Buttons/CustomButton";
 import { useLoginForm } from "../hooks/useLoginForm";
 
-export default function LoginScreen({ onOpenRegister }) {
+export default function LoginScreen({ onOpenRegister, onOpenRecovery }) {
   const { email, setEmail, password, setPassword, loading, error, submit } =
     useLoginForm();
 
@@ -38,6 +38,15 @@ export default function LoginScreen({ onOpenRegister }) {
           contra
           setTextChange={setPassword}
         />
+
+        <TouchableOpacity
+          onPress={onOpenRecovery}
+          style={styles.forgotPasswordButton}
+        >
+          <Text style={styles.forgotPasswordText}>
+            ¿Olvidaste tu contraseña?
+          </Text>
+        </TouchableOpacity>
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
@@ -99,6 +108,15 @@ const styles = StyleSheet.create({
   },
   loader: {
     marginTop: 10,
+  },
+  forgotPasswordButton: {
+    alignSelf: "flex-end",
+    marginTop: 6,
+  },
+  forgotPasswordText: {
+    color: "#C26D3B",
+    fontSize: 13,
+    fontWeight: "700",
   },
   registerPrompt: {
     flexDirection: "row",
